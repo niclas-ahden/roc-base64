@@ -69,7 +69,9 @@ encode_with = |bytes, char62, char63, pad| {
 	encoded = encode_loop(bytes, 0, char62, char63, pad, List.with_capacity((bytes.len() / 3 + 1) * 4))
 	match Str.from_utf8(encoded) {
 		Ok(s) => s
-		Err(_) => "" # Unreachable: sextet_char only emits ASCII
+
+		# Unreachable: sextet_char only emits ASCII
+		Err(_) => ""
 	}
 }
 
@@ -79,7 +81,7 @@ encode_loop = |bytes, pos, char62, char63, pad, out|
 		b0 = (bytes.get(pos) ?? 0).to_u32()
 		b1 = (bytes.get(pos + 1) ?? 0).to_u32()
 		b2 = (bytes.get(pos + 2) ?? 0).to_u32()
-		group = b0.shift_left_by(16).bitwise_or(b1.shift_left_by(8)).bitwise_or(b2)
+		group = b0.shl_wrap(16).bitwise_or(b1.shl_wrap(8)).bitwise_or(b2)
 		encode_loop(
 			bytes,
 			pos + 3,
@@ -87,29 +89,37 @@ encode_loop = |bytes, pos, char62, char63, pad, out|
 			char63,
 			pad,
 			out
-				.append(sextet_char(group.shift_right_by(18).bitwise_and(63), char62, char63))
-				.append(sextet_char(group.shift_right_by(12).bitwise_and(63), char62, char63))
-				.append(sextet_char(group.shift_right_by(6).bitwise_and(63), char62, char63))
+				.append(sextet_char(group.shr_wrap(18).bitwise_and(63), char62, char63))
+				.append(sextet_char(group.shr_wrap(12).bitwise_and(63), char62, char63))
+				.append(sextet_char(group.shr_wrap(6).bitwise_and(63), char62, char63))
 				.append(sextet_char(group.bitwise_and(63), char62, char63)),
 		)
 	} else if pos + 2 == bytes.len() {
 		b0 = (bytes.get(pos) ?? 0).to_u32()
 		b1 = (bytes.get(pos + 1) ?? 0).to_u32()
-		group = b0.shift_left_by(16).bitwise_or(b1.shift_left_by(8))
+		group = b0.shl_wrap(16).bitwise_or(b1.shl_wrap(8))
 		with_chars =
 			out
-				.append(sextet_char(group.shift_right_by(18).bitwise_and(63), char62, char63))
-				.append(sextet_char(group.shift_right_by(12).bitwise_and(63), char62, char63))
-				.append(sextet_char(group.shift_right_by(6).bitwise_and(63), char62, char63))
-		if pad { with_chars.append(61) } else { with_chars }
+				.append(sextet_char(group.shr_wrap(18).bitwise_and(63), char62, char63))
+				.append(sextet_char(group.shr_wrap(12).bitwise_and(63), char62, char63))
+				.append(sextet_char(group.shr_wrap(6).bitwise_and(63), char62, char63))
+		if pad {
+			with_chars.append(61)
+		} else {
+			with_chars
+		}
 	} else if pos + 1 == bytes.len() {
 		b0 = (bytes.get(pos) ?? 0).to_u32()
-		group = b0.shift_left_by(16)
+		group = b0.shl_wrap(16)
 		with_chars =
 			out
-				.append(sextet_char(group.shift_right_by(18).bitwise_and(63), char62, char63))
-				.append(sextet_char(group.shift_right_by(12).bitwise_and(63), char62, char63))
-		if pad { with_chars.append(61).append(61) } else { with_chars }
+				.append(sextet_char(group.shr_wrap(18).bitwise_and(63), char62, char63))
+				.append(sextet_char(group.shr_wrap(12).bitwise_and(63), char62, char63))
+		if pad {
+			with_chars.append(61).append(61)
+		} else {
+			with_chars
+		}
 	} else {
 		out
 	}
@@ -177,7 +187,7 @@ decode_loop = |chars, pos, body_len, char62, char63, out|
 		s1 = sextet_value(chars.get(pos + 1) ?? 61, char62, char63)?
 		s2 = sextet_value(chars.get(pos + 2) ?? 61, char62, char63)?
 		s3 = sextet_value(chars.get(pos + 3) ?? 61, char62, char63)?
-		group = s0.shift_left_by(18).bitwise_or(s1.shift_left_by(12)).bitwise_or(s2.shift_left_by(6)).bitwise_or(s3)
+		group = s0.shl_wrap(18).bitwise_or(s1.shl_wrap(12)).bitwise_or(s2.shl_wrap(6)).bitwise_or(s3)
 		decode_loop(
 			chars,
 			pos + 4,
@@ -185,25 +195,25 @@ decode_loop = |chars, pos, body_len, char62, char63, out|
 			char62,
 			char63,
 			out
-				.append(group.shift_right_by(16).bitwise_and(0xFF).to_u8_wrap())
-				.append(group.shift_right_by(8).bitwise_and(0xFF).to_u8_wrap())
+				.append(group.shr_wrap(16).bitwise_and(0xFF).to_u8_wrap())
+				.append(group.shr_wrap(8).bitwise_and(0xFF).to_u8_wrap())
 				.append(group.bitwise_and(0xFF).to_u8_wrap()),
 		)
 	} else if pos + 3 == body_len {
 		s0 = sextet_value(chars.get(pos) ?? 61, char62, char63)?
 		s1 = sextet_value(chars.get(pos + 1) ?? 61, char62, char63)?
 		s2 = sextet_value(chars.get(pos + 2) ?? 61, char62, char63)?
-		group = s0.shift_left_by(18).bitwise_or(s1.shift_left_by(12)).bitwise_or(s2.shift_left_by(6))
+		group = s0.shl_wrap(18).bitwise_or(s1.shl_wrap(12)).bitwise_or(s2.shl_wrap(6))
 		Ok(
 			out
-				.append(group.shift_right_by(16).bitwise_and(0xFF).to_u8_wrap())
-				.append(group.shift_right_by(8).bitwise_and(0xFF).to_u8_wrap()),
+				.append(group.shr_wrap(16).bitwise_and(0xFF).to_u8_wrap())
+				.append(group.shr_wrap(8).bitwise_and(0xFF).to_u8_wrap()),
 		)
 	} else if pos + 2 == body_len {
 		s0 = sextet_value(chars.get(pos) ?? 61, char62, char63)?
 		s1 = sextet_value(chars.get(pos + 1) ?? 61, char62, char63)?
-		group = s0.shift_left_by(18).bitwise_or(s1.shift_left_by(12))
-		Ok(out.append(group.shift_right_by(16).bitwise_and(0xFF).to_u8_wrap()))
+		group = s0.shl_wrap(18).bitwise_or(s1.shl_wrap(12))
+		Ok(out.append(group.shr_wrap(16).bitwise_and(0xFF).to_u8_wrap()))
 	} else {
 		Ok(out)
 	}

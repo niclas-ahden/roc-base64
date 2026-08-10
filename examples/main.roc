@@ -23,6 +23,5 @@ main! = |_| {
 		}
 	Stdout.line!("Decoded: ${decoded}")
 
-
 	Ok({})
 }
