@@ -102,7 +102,6 @@
           default = pkgs.mkShell {
             buildInputs = [
               roc
-              pkgs.cachix
               pkgs.watchexec
             ];
 
