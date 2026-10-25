@@ -16,12 +16,14 @@ main! = |_| {
 	encoded = Base64.encode("https://www.youtube.com/watch?v=QG_TBIGY2Iw".to_utf8())
 	Stdout.line!("Encoded: ${encoded}")
 
-	decoded =
-		match Base64.decode(encoded) {
-			Ok(bytes) => Str.from_utf8(bytes) ?? "Invalid UTF-8"
-			Err(e) => "Decode failed: ${Str.inspect(e)}"
-		}
-	Stdout.line!("Decoded: ${decoded}")
+	Stdout.line!("Decoded: ${decode_to_str(encoded)}")
 
 	Ok({})
 }
+
+decode_to_str : Str -> Str
+decode_to_str = |encoded|
+	match Base64.decode(encoded) {
+		Ok(bytes) => Str.from_utf8(bytes) ?? "Invalid UTF-8"
+		Err(e) => "Decode failed: ${Str.inspect(e)}"
+	}
