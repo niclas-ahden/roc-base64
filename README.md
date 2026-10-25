@@ -7,7 +7,7 @@ Base64 encoding and decoding as per RFC 4648. The standard alphabet with `=` pad
 ```roc
 app [main!] {
     pf: platform "https://github.com/lukewilliamboswell/roc-platform-template-zig/releases/download/0.9/8GdFEvQYS3TeAZxKvTzCLVdQiomweGtXcdZkXNDEeABq.tar.zst",
-    base64: "https://github.com/niclas-ahden/roc-base64/releases/download/1.0.0/EbhFL76r4ExvRvPmho7o3fhWjpTV4fQNG1g8w74BN4Sq.tar.zst",
+    base64: "https://github.com/niclas-ahden/roc-base64/releases/download/1.0.2/DQBxATK6BtaCWe56bCmkMgdKJR2Ym8NiZZLhYCAgtLac.tar.zst",
 }
 
 import pf.Stdout
