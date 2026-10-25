@@ -1,1 +1,0 @@
-Learn the new Roc syntax here https://github.com/roc-lang/roc/blob/main/docs/mini-tutorial-new-compiler.md and here are examples of all syntax https://github.com/roc-lang/roc/blob/main/test/echo/all_syntax_test.roc.
