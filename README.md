@@ -36,6 +36,12 @@ main! = |_| {
 
 See [examples](examples) for a runnable program.
 
+## Performance
+
+Encoding and decoding use SIMD for the bulk of the input, following
+[Muła and Lemire](https://arxiv.org/abs/1704.00605), and [bench](bench)
+measures them.
+
 ## Documentation
 
 View the brief API documentation at [https://niclas-ahden.github.io/roc-base64/](https://niclas-ahden.github.io/roc-base64/).
